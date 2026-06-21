@@ -5,9 +5,9 @@ from flask_security import UserMixin, RoleMixin
 
 class User(db.Model, UserMixin ):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(255), unique=True)
-    password = db.Column(db.String(255))
-    active = db.Column(db.Boolean())
+    email = db.Column(db.String(255), unique=True, nullable=False)
+    password = db.Column(db.String(255), nullable=False)
+    active = db.Column(db.Boolean(),default=True)
 
     fs_uniquifier = db.Column(db.String(255), unique=True, nullable=False)
     fs_token_uniquifier = db.Column(db.String(255), unique=True, nullable=False)
@@ -16,11 +16,12 @@ class User(db.Model, UserMixin ):
 
 class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(80), unique=True)
+    name = db.Column(db.String(80), unique=True, nullable=False)
     description = db.Column(db.String(255))
 
 
 class UserRoles(db.Model):
+    __tablename__ = 'user_roles'
     id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
     role_id = db.Column(db.Integer(), db.ForeignKey('role.id', ondelete='CASCADE'), nullable=False)
@@ -40,7 +41,7 @@ class Student(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     applications = db.relationship('Application', backref='student', cascade='all, delete')
-
+    user = db.relationship('User', backref=db.backref('student', uselist=False))
 
 class Company(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -54,7 +55,7 @@ class Company(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     drives = db.relationship('PlacementDrive', backref='company', cascade='all, delete')
-
+    user = db.relationship('User', backref=db.backref('company', uselist=False))
 
 class PlacementDrive(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -80,7 +81,7 @@ class Application(db.Model):
     status = db.Column(db.String(50), default="applied")
     applied_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    interview = db.relationship('Interview', backref='application', uselist=False)
+    interview = db.relationship('Interview',backref='application',uselist=False,cascade='all, delete-orphan')
 
     __table_args__ = (db.UniqueConstraint('student_id', 'drive_id', name='unique_application'),)
 

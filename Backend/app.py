@@ -34,7 +34,7 @@ def create_app():
 
 app, api = create_app()
 
-CORS(app, origin=['http://localhost:5173','http://127.0.0.1:5000'])
+CORS(app, origins=['http://localhost:5173','http://127.0.0.1:5000'])
 
 @app.route('/celery')
 def example():

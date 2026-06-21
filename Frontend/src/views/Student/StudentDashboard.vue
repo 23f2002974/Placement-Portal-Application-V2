@@ -1,200 +1,118 @@
 <template>
-<div class="container-fluid p-4" >
+<div>
 
     <!-- Header -->
-    <div class="d-flex justify-content-between mb-4">
-        <h3>Student Dashboard</h3>
-        <div>
-            <button class="btn btn-outline-secondary btn-sm me-2">Edit Profile</button>
-            <button class="btn btn-outline-primary btn-sm me-2">History</button>
-            <button class="btn btn-outline-danger btn-sm">Logout</button>
+
+    <div class="mb-4">
+        <h1 class="fw-bold">Dashboard</h1>
+        <p class="text-muted">
+            Welcome back to your placement dashboard.
+        </p>
+    </div>
+
+    <!-- Stats -->
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <h2>{{ organizations.length }}</h2>
+                <span>Total Companies</span>
+            </div>
         </div>
+
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <h2>{{ appliedDrives.length }}</h2>
+                <span>Applied</span>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <h2>2</h2>
+                <span>Selected</span>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <h2>5</h2>
+                <span>Upcoming</span>
+            </div>
+        </div>
+
     </div>
 
     <div class="row">
 
-        <!-- LEFT SIDE -->
-        <div class="col-md-6">
+        <!-- LEFT -->
 
-            <!-- Organizations -->
-            <div class="card mb-4">
+        <div class="col-lg-6">
+
+            <div class="card shadow-sm mb-4">
+
                 <div class="card-header">
                     <strong>Organizations</strong>
                 </div>
 
                 <div class="card-body">
-                    <div v-for="org in organizations"
-                        :key="org.id"
-                        class="d-flex justify-content-between border p-2 mb-2">
-                        <span>{{ org.id + 1 }}</span>
-                        <span>{{ org.name }}</span>
+
+                    <div
+                    v-for="org in organizations"
+                    :key="org.id"
+                    class="company-row">
+
+                        <div>
+                            {{ org.name }}
+                        </div>
 
                         <button
                         class="btn btn-primary btn-sm"
                         @click="viewCompany(org)">
-                        View Details
+                            View
                         </button>
 
                     </div>
+
                 </div>
+
             </div>
 
+            <div class="card shadow-sm">
 
-            <!-- Applied Drives -->
-            <div class="card">
                 <div class="card-header">
                     <strong>Applied Drives</strong>
                 </div>
 
-                <table class="table table-bordered mb-0">
-                    <thead>
-                        <tr>
-                            <th>Sr</th>
-                            <th>Drive</th>
-                            <th>Company</th>
-                            <th>Date</th>
-                            <th></th>
-                        </tr>
-                    </thead>
+                <div class="card-body p-0">
 
-                    <tbody>
-                        <tr v-for="(drive,index) in appliedDrives" :key="drive.id">
-                            <td>{{ index+1 }}</td>
-                            <td>{{ drive.name }}</td>
-                            <td>{{ drive.company }}</td>
-                            <td>{{ drive.date }}</td>
-
-                            <td>
-                                <button
-                                class="btn btn-info btn-sm"
-                                @click="viewDrive(drive)">
-                                View Details
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-
-            </div>
-
-        </div>
-
-
-        <!-- RIGHT SIDE -->
-        <div class="col-md-6">
-
-            <!-- Company Overview -->
-            <div v-if="selectedCompany" class="card mb-4">
-
-                <div class="card-header d-flex justify-content-between">
-                    <strong>{{ selectedCompany.name }}</strong>
-                    <button class="btn btn-outline-secondary btn-sm">
-                        History
-                    </button>
-                </div>
-
-                <div class="card-body">
-
-                    <h6>Overview</h6>
-                    <p>{{ selectedCompany.description }}</p>
-
-                    <h6 class="mt-3">Current Drives</h6>
-
-                    <div
-                    v-for="drive in selectedCompany.drives"
-                    :key="drive.id"
-                    class="d-flex justify-content-between border p-2 mb-2">
-
-                        <span>{{ drive.name }}</span>
-
-                        <button
-                        class="btn btn-primary btn-sm"
-                        @click="viewDrive(drive)">
-                        View Details
-                        </button>
-
-                    </div>
-
-                </div>
-            </div>
-
-
-            <!-- Drive Details -->
-            <div v-if="selectedDrive" class="card">
-
-                <div class="card-header">
-                    <strong>{{ selectedDrive.name }}</strong>
-                </div>
-
-                <div class="card-body">
-
-                    <p><b>Job Title:</b> {{ selectedDrive.job }}</p>
-                    <p><b>Location:</b> {{ selectedDrive.location }}</p>
-                    <p><b>Salary:</b> {{ selectedDrive.salary }}</p>
-
-                    <p class="mt-3">
-                        {{ selectedDrive.description }}
-                    </p>
-
-                    <div class="mt-3">
-                        <button
-                        class="btn btn-success me-2"
-                        @click="applyDrive">
-                        Apply
-                        </button>
-
-                        <button
-                        class="btn btn-secondary"
-                        @click="selectedDrive=null">
-                        Go Back
-                        </button>
-                    </div>
-
-                </div>
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- Application History Modal -->
-    <div v-if="showHistory" class="modal d-block">
-
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-
-                <div class="modal-header">
-                    <h5>Student Application History</h5>
-                    <button
-                    class="btn btn-sm btn-outline-secondary"
-                    @click="showHistory=false">
-                    Back
-                    </button>
-                </div>
-
-                <div class="modal-body">
-
-                    <table class="table table-bordered">
+                    <table class="table mb-0">
 
                         <thead>
+
                             <tr>
+                                <th>#</th>
                                 <th>Drive</th>
-                                <th>Interview</th>
-                                <th>Job Title</th>
-                                <th>Result</th>
-                                <th>Remark</th>
+                                <th>Company</th>
+                                <th>Date</th>
                             </tr>
+
                         </thead>
 
                         <tbody>
-                            <tr v-for="h in history" :key="h.id">
-                                <td>{{ h.drive }}</td>
-                                <td>{{ h.interview }}</td>
-                                <td>{{ h.job }}</td>
-                                <td>{{ h.result }}</td>
-                                <td>{{ h.remark }}</td>
+
+                            <tr
+                            v-for="(drive,index) in appliedDrives"
+                            :key="drive.id">
+
+                                <td>{{ index+1 }}</td>
+                                <td>{{ drive.name }}</td>
+                                <td>{{ drive.company }}</td>
+                                <td>{{ drive.date }}</td>
+
                             </tr>
+
                         </tbody>
 
                     </table>
@@ -202,6 +120,95 @@
                 </div>
 
             </div>
+
+        </div>
+
+        <!-- RIGHT -->
+
+        <div class="col-lg-6">
+
+            <div
+            v-if="selectedCompany"
+            class="card shadow-sm mb-4">
+
+                <div class="card-header">
+                    <strong>
+                        {{ selectedCompany.name }}
+                    </strong>
+                </div>
+
+                <div class="card-body">
+
+                    <p>
+                        {{ selectedCompany.description }}
+                    </p>
+
+                    <h6 class="mt-4">
+                        Available Drives
+                    </h6>
+
+                    <div
+                    v-for="drive in selectedCompany.drives"
+                    :key="drive.id"
+                    class="company-row">
+
+                        <span>
+                            {{ drive.name }}
+                        </span>
+
+                        <button
+                        class="btn btn-primary btn-sm"
+                        @click="viewDrive(drive)">
+                            Details
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div
+            v-if="selectedDrive"
+            class="card shadow-sm">
+
+                <div class="card-header">
+                    <strong>
+                        {{ selectedDrive.name }}
+                    </strong>
+                </div>
+
+                <div class="card-body">
+
+                    <p>
+                        <b>Role:</b>
+                        {{ selectedDrive.job }}
+                    </p>
+
+                    <p>
+                        <b>Location:</b>
+                        {{ selectedDrive.location }}
+                    </p>
+
+                    <p>
+                        <b>Salary:</b>
+                        {{ selectedDrive.salary }}
+                    </p>
+
+                    <p>
+                        {{ selectedDrive.description }}
+                    </p>
+
+                    <button
+                    class="btn btn-success"
+                    @click="applyDrive">
+                        Apply Now
+                    </button>
+
+                </div>
+
+            </div>
+
         </div>
 
     </div>
@@ -209,71 +216,117 @@
 </div>
 </template>
 
-
 <script setup>
-import { ref, onMounted } from "vue"
+import { ref,onMounted } from "vue"
+
 const organizations = ref([])
-onMounted(async () => {
-  try {
-    const res = await fetch("http://127.0.0.1:5000/api/student/companies")
-    const data = await res.json()
-
-    organizations.value = data.companies
-
-  } catch (err) {
-    console.error("Error fetching companies:", err)
-  }
-})
-
-const appliedDrives = ref([
-{ id:1,name:"Drive 1",company:"Company 2",date:"24/09/2025"},
-{ id:1,name:"Drive 1",company:"Company 2",date:"24/09/2025"}
-])
-
-const history = ref([
-{ id:1,drive:"Drive 1",interview:"In-person",job:"SDE",result:"Shortlisted",remark:"None"},
-{ id:2,drive:"Drive 2",interview:"Online",job:"SWE",result:"Rejected",remark:"None"},
-{ id:3,drive:"Drive 3",interview:"In-person",job:"SDE",result:"Applied",remark:"None"}
-])
-
 const selectedCompany = ref(null)
 const selectedDrive = ref(null)
-const showHistory = ref(false)
 
-async function viewCompany(org){
-  try {
-    const res = await fetch(
-      `http://127.0.0.1:5000/api/student/companies/${org.id}/drives`
-    )
+const appliedDrives = ref([
+{
+id:1,
+name:"Software Engineer",
+company:"Infosys",
+date:"24/09/2025"
+},
+{
+id:2,
+name:"Data Analyst",
+company:"TCS",
+date:"30/09/2025"
+}
+])
 
-    console.log("API status:", res.status)
+onMounted(async()=>{
 
-    const data = await res.json()
-    console.log("Drives data:", data)
+    try{
 
-    selectedCompany.value = {
-      name: org.name,
-      description: org.description,
-      website: org.website,
-      drives: data.drives || []
+        const res = await fetch(
+        "http://127.0.0.1:5000/api/student/companies"
+        )
+
+        const data = await res.json()
+
+        organizations.value =
+        data.companies || []
+        console.log(organizations.value)
+
     }
 
-  } catch (err) {
-    console.error("Error fetching drives:", err)
-  }
+    catch(err){
+        console.log(err)
+    }
+
+})
+
+async function viewCompany(org){
+
+    try{
+
+        const res = await fetch(
+        `http://127.0.0.1:5000/api/student/companies/${org.id}/drives`
+        )
+
+        const data = await res.json()
+
+        selectedCompany.value = {
+
+            name:org.name,
+            description:org.description,
+            drives:data.drives || []
+
+        }
+
+    }
+
+    catch(err){
+
+        console.log(err)
+
+    }
+
 }
 
 function viewDrive(drive){
-selectedDrive.value={
-name:drive.name,
-job:"Senior Software Developer",
-location:"Chennai",
-salary:"₹6,00,000",
-description:"Design scalable systems and build backend services."
-}
+
+    selectedDrive.value = {
+
+        name:drive.name,
+        job:"Software Engineer",
+        location:"Bangalore",
+        salary:"₹8 LPA",
+        description:
+        "Build scalable backend systems."
+
+    }
+
 }
 
 function applyDrive(){
-alert("Application submitted!")
+
+    alert("Application Submitted")
+
 }
 </script>
+
+<style scoped>
+.stat-card{
+    padding:20px;
+    text-align:center;
+}
+
+.stat-card h2{
+    margin-bottom:10px;
+}
+
+.company-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    margin-bottom:10px;
+}
+</style>

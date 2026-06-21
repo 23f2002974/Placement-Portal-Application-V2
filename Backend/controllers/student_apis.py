@@ -15,8 +15,8 @@ class get_company_list(Resource):
             'name': company.name,
             'description': company.description,
             'website': company.website
-        }
-        company_list.append(company_data)
+            }
+            company_list.append(company_data)
     
         return make_response(jsonify({'companies': company_list}), 200)
     
