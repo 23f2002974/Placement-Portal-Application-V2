@@ -3,6 +3,11 @@ from flask import request, jsonify, make_response
 from flask_security import utils, auth_token_required, roles_required
 from controllers.user_datastore import user_datastore
 from controllers.database import db
+from flask import request
+from .models import User, Student, Company
+from flask_restful import Resource
+from werkzeug.utils import secure_filename
+import os
 
 class LoginApi(Resource):
     def post(self):
@@ -46,43 +51,89 @@ class LogoutApi(Resource):
     
 
 
-class RegisterApi(Resource):
+class StudentRegisterApi(Resource):
     def post(self):
-        data = request.get_json()
-        if not data:
-            return make_response(jsonify({'error': 'Invalid input'}), 400)
-        
-        email = data.get('email', None)
-        password = data.get('password', None)
-        role = data.get('role', None)
 
-        if not email or not password or not role:
-            return make_response(jsonify({'error': 'Email, password, and role are required'}), 400)
-        
-        if '@' not in email or '.' not in email.split('@')[-1]:
-            return make_response(jsonify({'error': 'Invalid email format'}), 400)
-        
+        email = request.form.get("email")
+        password = request.form.get("password")
+
+        if not email or not password:
+            return {"error": "Email and password are required"}, 400
+
         if user_datastore.find_user(email=email):
-            return make_response(jsonify({'error': 'Email already registered'}), 400)
-        
-        user_role = user_datastore.find_role(role)
-        if not user_role:
-            return make_response(jsonify({'error': 'Invalid role specified'}), 400)
+            return {"error": "Email already exists"}, 400
 
-        new_user = user_datastore.create_user(
+        role = user_datastore.find_role("student")
+
+        user = user_datastore.create_user(
             email=email,
             password=utils.hash_password(password),
-            roles=[user_role]
+            roles=[role]
         )
 
+        db.session.flush()
+
+        # Resume upload
+        resume = request.files.get("resume")
+        resume_path = None
+
+        if resume:
+            filename = secure_filename(resume.filename)
+
+            upload_folder = os.path.join("uploads", "resumes")
+            os.makedirs(upload_folder, exist_ok=True)
+
+            resume_path = os.path.join(upload_folder, filename)
+            resume.save(resume_path)
+
+        student = Student(
+            user_id=user.id,
+            full_name=request.form.get("full_name"),
+            branch=request.form.get("branch"),
+            cgpa=float(request.form.get("cgpa")),
+            graduation_year=int(request.form.get("graduation_year")),
+            phone=request.form.get("phone"),
+            resume_url=resume_path      # add this column if needed
+        )
+
+        db.session.add(student)
         db.session.commit()
 
-        response = {
-            'message': 'User registered successfully',
-            'user': {
-                'email': new_user.email,
-                'roles': [role.name for role in new_user.roles]
-            }
-        }
+        return {
+            "message": "Student registered successfully",
+            "resume_uploaded": bool(resume)
+        }, 201
+    
+class CompanyRegisterApi(Resource):
+    def post(self):
+        data = request.get_json()
 
-        return make_response(jsonify(response), 201)
+        email = data.get("email")
+        password = data.get("password")
+
+        if user_datastore.find_user(email=email):
+            return {"error": "Email already exists"}, 400
+
+        role = user_datastore.find_role("company")
+
+        user = user_datastore.create_user(
+            email=email,
+            password=utils.hash_password(password),
+            roles=[role]
+        )
+
+        db.session.flush()
+
+        company = Company(
+            user_id=user.id,
+            name=data["companyName"],
+            website=data.get("website"),
+            description=data.get("description")
+        )
+
+        db.session.add(company)
+        db.session.commit()
+
+        return {
+            "message": "Company registered successfully"
+        }, 201

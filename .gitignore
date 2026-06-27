@@ -1,3 +1,5 @@
 .DS_Store
 *.pyc
 /Backend/env
+Backend/uploads/resumes/-Internship-_Questionnaire_GAOTek_Inc_2_1.pdf
+.gitignore

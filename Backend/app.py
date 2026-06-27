@@ -34,7 +34,7 @@ def create_app():
 
 app, api = create_app()
 
-CORS(app, origins=['http://localhost:5173','http://127.0.0.1:5000'])
+CORS(app)
 
 @app.route('/celery')
 def example():
@@ -48,12 +48,13 @@ def send_email_route():
     send_welcome_email.delay(to_email)
     return "Email has been sent!"
 
-from controllers.auth_apis import LoginApi, LogoutApi, RegisterApi
+from controllers.auth_apis import LoginApi, LogoutApi, StudentRegisterApi, CompanyRegisterApi
 
 
 api.add_resource(LoginApi, '/login')
 api.add_resource(LogoutApi, '/logout')
-api.add_resource(RegisterApi, '/register')
+api.add_resource(StudentRegisterApi, '/students/register')
+api.add_resource(CompanyRegisterApi, '/companies/register')
 
 from controllers.admin_apis import GetCompanyListApi, ApproveCompanyApi, RejectCompanyApi, GetPendingCompanyListApi
 api.add_resource(GetCompanyListApi, '/companies')
